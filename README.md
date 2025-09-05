@@ -116,8 +116,8 @@ use Illuminate\Support\Facades\Route;
 Route::any('/demo',function(){
     return ['msg'=>'HelloWorld'];
 });
-Route::get('/test',[ManoCode\FileSystem\Http\Controllers\DemoApiController::class,'test']);
-Route::get('/test1',[ManoCode\FileSystem\Http\Controllers\DemoApiController::class,'test1']);
+Route::get('/test',[SwapCloud\FileSystem\Http\Controllers\DemoApiController::class,'test']);
+Route::get('/test1',[SwapCloud\FileSystem\Http\Controllers\DemoApiController::class,'test1']);
 ```
 
 
@@ -128,10 +128,10 @@ Route::get('/test1',[ManoCode\FileSystem\Http\Controllers\DemoApiController::cla
 ```php
 <?php
 
-namespace ManoCode\FileSystem\Http\Controllers;
+namespace SwapCloud\FileSystem\Http\Controllers;
 
 use Illuminate\Routing\Controller;
-use ManoCode\CustomExtend\Traits\ApiResponseTrait;
+use SwapCloud\CustomExtend\Traits\ApiResponseTrait;
 
 /**
  *

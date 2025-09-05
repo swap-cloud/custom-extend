@@ -1,0 +1,36 @@
+{
+    "name": "swap-cloud/custom-extend",
+    "alias": "OWL-Admin中间层",
+    "description": "基于owl-admin和amis的底层自定义拓展",
+    "type": "library",
+    "version": "v1.2.3",
+    "keywords": ["extension"],
+    "homepage": "https://github.com/itxiao6/custom-extend",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "戒尺",
+            "email": "itxiao6@qq.com"
+        }
+    ],
+    "require": {
+        "php": ">=8.0",
+        "slowlyo/owl-admin": "*",
+        "slowlyo/owl-dict": "*"
+    },
+    "autoload": {
+        "psr-4": {
+            "SwapCloud\\CustomExtend\\": "src/"
+        },
+        "files": [
+            "./src/Functions.php"
+        ]
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "SwapCloud\\CustomExtend\\CustomExtendServiceProvider"
+            ]
+        }
+    }
+}

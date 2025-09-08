@@ -16,7 +16,9 @@
     "require": {
         "php": ">=8.0",
         "slowlyo/owl-admin": "*",
-        "slowlyo/owl-dict": "*"
+        "slowlyo/owl-dict": "*",
+        "hhxsv5/laravel-s": "^3.7",
+        "swoole/ide-helper": "^6.0"
     },
     "autoload": {
         "psr-4": {

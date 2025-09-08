@@ -171,3 +171,17 @@ function admin_user_role_check(string|array $role):bool;
 admin_user_role_check('Administrator');// 检查是否是 超级管理员
 admin_user_role_check(['Administrator','user-passs']);// 检查是否是 超级管理员 并且是 用户审核员
 ```
+
+
+#### 5. LaravelSwoole 支持
+
+
+##### 初始化
+```bash
+php artisan laravels publish
+```
+
+##### 常用操作
+```bash
+php bin/laravels {start|stop|restart|reload|info|help}
+```

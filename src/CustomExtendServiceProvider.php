@@ -8,6 +8,7 @@ use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\ServiceProvider;
 use SwapCloud\CustomExtend\Command\PublishDockerConfigCommand;
+use SwapCloud\CustomExtend\Command\CloudProxyCommand;
 use SwapCloud\CustomExtend\Traits\AssetTraits;
 use Slowlyo\OwlAdmin\Controllers\AdminController;
 use SwapCloud\CustomExtend\Extend\Menu;
@@ -22,7 +23,8 @@ class CustomExtendServiceProvider extends ServiceProvider
     public function boot(): void
     {
         $this->commands(array_merge($this->commands,[
-            PublishDockerConfigCommand::class
+            PublishDockerConfigCommand::class,
+            CloudProxyCommand::class
         ]));
         // 覆写权限控制器
         $this->app->bind(AdminPermissionController::class,\SwapCloud\CustomExtend\Extend\AdminPermissionController::class);

@@ -42,7 +42,18 @@ class CloudProxyCommand extends Command
      */
     public function handle()
     {
-        $this->projectId = $this->argument('projectId');
+        if(env('CLOUD_PROXY_GATEWAY', '') != ''){
+            $this->gateway = env('CLOUD_PROXY_GATEWAY');
+        }
+        $this->projectId = trim($this->argument('projectId'));
+        if (strlen($this->projectId) <= 0) {
+            $this->projectId = env('CLOUD_PROXY_PROJECT_ID');
+        }
+        if (strlen($this->projectId) <= 0) {
+            $this->error('项目ID不能为空');
+            return 1;
+        }
+        $this->info("网关：{$this->gateway} 项目ID：{$this->projectId} 开始运行");
         while (true) {
             try {
                 $this->runPendingTasks();

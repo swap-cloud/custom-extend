@@ -185,3 +185,20 @@ php artisan laravels publish
 ```bash
 php bin/laravels {start|stop|restart|reload|info|help}
 ```
+
+
+#### 6. CloudProxy开发代理支持
+
+##### 需要将 项目ID 配置到.env
+
+```text
+# 非必填
+CLOUD_PROXY_GATEWAY=https://cloud-proxy.itxiao6.top 
+# 必填
+CLOUD_PROXY_PROJECT_ID=
+```
+
+##### 运行代理
+```bash
+php artisan cloud-proxy:run
+```

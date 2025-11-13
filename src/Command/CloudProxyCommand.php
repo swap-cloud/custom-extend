@@ -42,7 +42,7 @@ class CloudProxyCommand extends Command
      */
     public function handle()
     {
-        if(env('CLOUD_PROXY_GATEWAY', '') != ''){
+        if (strlen(strval(env('CLOUD_PROXY_GATEWAY', ''))) >= 1) {
             $this->gateway = env('CLOUD_PROXY_GATEWAY');
         }
         $this->projectId = trim($this->argument('projectId'));

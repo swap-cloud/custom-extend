@@ -17,7 +17,7 @@ class CloudProxyCommand extends Command
      *
      * @var string
      */
-    protected $signature = 'cloud-proxy:run {projectId}';
+    protected $signature = 'cloud-proxy:run';
 
     /**
      * The console command description.
@@ -45,10 +45,7 @@ class CloudProxyCommand extends Command
         if (strlen(strval(env('CLOUD_PROXY_GATEWAY', ''))) >= 1) {
             $this->gateway = env('CLOUD_PROXY_GATEWAY');
         }
-        $this->projectId = trim($this->argument('projectId'));
-        if (strlen($this->projectId) <= 0) {
-            $this->projectId = env('CLOUD_PROXY_PROJECT_ID');
-        }
+        $this->projectId = env('CLOUD_PROXY_PROJECT_ID');
         if (strlen($this->projectId) <= 0) {
             $this->error('项目ID不能为空');
             return 1;

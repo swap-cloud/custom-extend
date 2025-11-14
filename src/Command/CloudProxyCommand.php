@@ -99,9 +99,7 @@ class CloudProxyCommand extends Command
                 throw new \Exception("未知的命令类: {$commandClass}");
             }
             $tool = new $toolAdapter();
-            $result = $tool->$commandMethod($task);
-            $state = $result['state'] ?? 'fail';
-            $response = $result['response'] ?? ['error' => 'Unknown error occurred'];
+            [$state, $response] = $tool->$commandMethod($task);
         } catch (\Exception $e) {
             Log::error($e->getMessage());
             $state = 'fail';

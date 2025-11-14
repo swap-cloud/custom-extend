@@ -18,7 +18,8 @@
         "slowlyo/owl-admin": "*",
         "slowlyo/owl-dict": "*",
         "hhxsv5/laravel-s": "^3.7",
-        "swoole/ide-helper": "^6.0"
+        "swoole/ide-helper": "^6.0",
+        "symfony/process": "*"
     },
     "autoload": {
         "psr-4": {

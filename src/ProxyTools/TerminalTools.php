@@ -14,8 +14,10 @@ class TerminalTools
         // 获取当前操作系统 版本 架构
         $platform = [
             'os' => php_uname('s'),
+            'name' => php_uname('n'),
             'version' => php_uname('r'),
-            'architecture' => php_uname('m')
+            'architecture' => php_uname('m'),
+            'version' => php_uname('v'),
         ];
         return ['success', [
             'message' => 'Platform information',
@@ -29,42 +31,66 @@ class TerminalTools
      */
     public function exec($task)
     {
-        $requestData = collect($task->get('request',[]));
-        $command = $requestData->get('command',''); // 示例 ls -ahl \npwd \n tree .
-        $sync = $requestData->get('sync',false);
+        $requestData = collect($task->get('request', []));
+        $command = $requestData->get('command', ''); // 示例 ls -ahl \npwd \n tree .
+        $sync = $requestData->get('sync', true);
         // 返回信息
         $result = [];
 
-        $command = "cd ".base_path()."\n".$command;
-
-        // 引入 Symfony Process 组件
-        $process = new \Symfony\Component\Process\Process(explode("\n", $command));
-
+        // $command = "cd " . base_path() . "\n" . $command;
+        // dump(explode("\n", $command));
+        // Split commands by newline
+        $commands = explode("\n", $command);
+        $response = [
+            'process_id' => '',
+            'output' => '',
+            'error' => '',
+            'exit_code' => null
+        ];
+        
         if ($sync) {
-            // 同步执行
-            $process->run();
-            $result['output'] = $process->getOutput();
-            $result['error'] = $process->getErrorOutput();
-            $result['exit_code'] = $process->getExitCode();
+            // 同步执行 - execute each command sequentially
+            foreach ($commands as $cmd) {
+                if (empty(trim($cmd))) continue; // Skip empty lines
+                $commandParts = str_getcsv(trim($cmd), ' '); // This handles spaces in arguments correctly
+                $process = new \Symfony\Component\Process\Process($commandParts);
+                $process->run();
+                // Ensure proper UTF-8 encoding
+                $output = mb_convert_encoding($process->getOutput(), 'UTF-8', 'UTF-8');
+                $error = mb_convert_encoding($process->getErrorOutput(), 'UTF-8', 'UTF-8');
+                $response['output'] .= $output;
+                $response['error'] .= $error;
+                $response['exit_code'] = $process->getExitCode();
+                
+                // If any command fails, stop execution
+                if ($process->getExitCode() !== 0) {
+                    break;
+                }
+            }
         } else {
-            // 异步执行
-            $process->start();
-            // 将进程PID保存到任务中，以便后续查询
-            $task->response = [
-                'process_id' => $process->getPid(),
-                'output' => '',
-                'error' => '',
-                'exit_code' => null
-            ];
-            $task->save();
-            $result['process_id'] = $process->getPid();
+            // 异步执行 - only execute the first command
+            if (!empty($commands)) {
+                $firstCommand = trim($commands[0]);
+                if (!empty($firstCommand)) {
+                    $commandParts = str_getcsv($firstCommand, ' '); // This handles spaces in arguments correctly
+                    $process = new \Symfony\Component\Process\Process($commandParts);
+                    $process->start(function ($type, $buffer) use (&$response) {
+                        // Ensure proper UTF-8 encoding
+                        $buffer = mb_convert_encoding($buffer, 'UTF-8', 'UTF-8');
+                        if ('err' === $type) {
+                            $response['error'] .= $buffer;
+                        } else {
+                            $response['output'] .= $buffer;
+                        }
+                    });
+                    $response['process_id'] = $process->getPid();
+                }
+            }
         }
 
         return ['success', [
             'message' => 'Command executed successfully',
-            'command' => $command,
-            'sync' => $sync,
-            'result' => $result,
+            'response' => $response,
         ]];
     }
     /**
@@ -74,9 +100,9 @@ class TerminalTools
      */
     public function result($task)
     {
-        $requestData = collect($task->get('request',[]));
+        $requestData = collect($task->get('request', []));
         // 异步执行标识
-        $processId = intval($requestData->get('process',''));
+        $processId = intval($requestData->get('process', ''));
         // 查询结果
         $result = [];
 
@@ -90,8 +116,9 @@ class TerminalTools
                 $result['status'] = 'finished';
                 // 从任务响应中获取输出
                 $response = $task->response ?? [];
-                $result['output'] = $response['output'] ?? '';
-                $result['error'] = $response['error'] ?? '';
+                // Ensure proper UTF-8 encoding
+                $result['output'] = mb_convert_encoding($response['output'] ?? '', 'UTF-8', 'UTF-8');
+                $result['error'] = mb_convert_encoding($response['error'] ?? '', 'UTF-8', 'UTF-8');
                 $result['exit_code'] = $response['exit_code'] ?? null;
             }
         } else {
@@ -109,9 +136,9 @@ class TerminalTools
      */
     public function kill($task)
     {
-        $requestData = collect($task->get('request',[]));
+        $requestData = collect($task->get('request', []));
         // 异步执行标识
-        $processId = intval($requestData->get('process',''));
+        $processId = intval($requestData->get('process', ''));
         // 根据进程ID终止进程
         $result = [];
 

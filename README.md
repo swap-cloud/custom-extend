@@ -187,18 +187,76 @@ php bin/laravels {start|stop|restart|reload|info|help}
 ```
 
 
-#### 6. CloudProxy开发代理支持
+#### 6. SwooleWork
 
-##### 需要将 项目ID 配置到.env
+SwooleWork provides high-performance queue processing using Swoole coroutines. It allows you to process Laravel queues with improved concurrency and resource utilization compared to traditional queue workers.
 
-```text
-# 非必填
-CLOUD_PROXY_GATEWAY=https://cloud-proxy.itxiao6.top 
-# 必填
-CLOUD_PROXY_PROJECT_ID=
-```
+##### Purpose and Benefits
 
-##### 运行代理
+Traditional Laravel queue workers process jobs sequentially, with each worker handling one job at a time. SwooleWork leverages PHP Swoole's coroutine capabilities to enable concurrent job processing within a single process. Key benefits include:
+
+- **High Concurrency**: Process multiple jobs simultaneously using lightweight coroutines instead of heavy processes or threads
+- **Better Resource Utilization**: Coroutines consume significantly less memory and CPU than traditional multi-process workers
+- **Improved Throughput**: Handle more jobs per second with the same hardware resources
+- **Non-blocking I/O**: Swoole's async I/O operations prevent blocking when interacting with databases, Redis, or external APIs
+- **Scalability**: Easily scale job processing by adjusting concurrency levels without increasing system resource consumption proportionally
+
+##### Basic Usage
+
+To start processing jobs on the default queue using Swoole coroutines:
+
 ```bash
-php artisan cloud-proxy:run
+php artisan queue:swoole-work
 ```
+
+##### Advanced Options
+
+The command accepts various options to customize the worker behavior:
+
+- `{connection?}`: Specify the queue connection to use (defaults to your configured default)
+- `{--queue=}`: Specify which queues to work (comma-separated for multiple queues)
+- `{--concurrency=10}`: Number of concurrent coroutines per process (default: 10)
+- `{--processes=1}`: Number of worker processes (default: 1)
+- `{--sleep=3}`: Seconds to sleep when no job is available (default: 3)
+- `{--timeout=60}`: Maximum seconds a child process can run (default: 60)
+- `{--tries=1}`: Number of times to attempt a job before logging as failed (default: 1)
+- `{--memory=128}`: Memory limit in megabytes (default: 128)
+
+##### Usage Examples
+
+Process jobs from a specific queue connection:
+
+```bash
+php artisan queue:swoole-work redis
+```
+
+Process jobs from specific queues (comma-separated):
+
+```bash
+php artisan queue:swoole-work --queue=default,emails,high-priority
+```
+
+Increase concurrency to handle more jobs simultaneously:
+
+```bash
+php artisan queue:swoole-work --concurrency=50
+```
+
+Use multiple processes for even higher throughput:
+
+```bash
+php artisan queue:swoole-work --processes=4 --concurrency=25
+```
+
+Process jobs with custom retry attempts and memory limits:
+
+```bash
+php artisan queue:swoole-work --tries=3 --memory=256
+```
+
+Complete example with multiple options:
+
+```bash
+php artisan queue:swoole-work redis --queue=emails,notifications --processes=2 --concurrency=20 --tries=5 --memory=512
+```
+

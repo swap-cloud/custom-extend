@@ -50,7 +50,7 @@ trait ApiResponseTrait
         ])->withHeaders([
             'Access-Control-Allow-Origin' => \request()->header('Origin') ?: '*',
             'Access-Control-Allow-Credentials' => (\request()->header('Origin') ?: '*')=='*'?'false':'true',
-            'Access-Control-Allow-Headers' => 'Accept, Content-Type, Authorization, X-Requested-With, locale',
+            'Access-Control-Allow-Headers' => 'Accept, Content-Type, Authorization, X-Requested-With, locale, Company',
             'Access-Control-Allow-Methods' => 'GET, POST, PUT, DELETE, OPTIONS',
         ]);
     }

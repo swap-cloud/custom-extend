@@ -18,21 +18,21 @@ class SwooleWorkCommand extends Command
      * @var string
      */
     protected $signature = 'queue:swoole-work
-                            {connection? : The name of the queue connection to work}
-                            {--queue= : The names of the queues to work}
-                            {--concurrency=10 : The number of coroutines per process}
-                            {--processes=1 : The number of worker processes}
-                            {--sleep=3 : Number of seconds to sleep when no job is available}
-                            {--timeout=60 : The number of seconds a child process can run}
-                            {--tries=1 : Number of times to attempt a job before logging it failed}
-                            {--memory=128 : The memory limit in megabytes}';
+                            {connection? : 要处理的队列连接名称}
+                            {--queue= : 要处理的队列名称}
+                            {--concurrency=10 : 每个进程的协程数量}
+                            {--processes=1 : 工作进程的数量}
+                            {--sleep=3 : 当没有任务可用时休眠的秒数}
+                            {--timeout=60 : 子进程可以运行的秒数}
+                            {--tries=1 : 任务失败前尝试的次数}
+                            {--memory=128 : 内存限制（兆字节）}';
 
     /**
      * The console command description.
      *
      * @var string
      */
-    protected $description = 'Process the queue using Swoole Coroutines';
+    protected $description = '使用 Swoole 协程处理队列';
 
     /**
      * Execute the console command.
@@ -43,10 +43,10 @@ class SwooleWorkCommand extends Command
     {
         $connection = $this->argument('connection') ?: config('queue.default');
         $queue = $this->option('queue') ?: config("queue.connections.{$connection}.queue", 'default');
-        
+
         $concurrency = (int) $this->option('concurrency');
         $processes = (int) $this->option('processes');
-        
+
         if (!extension_loaded('swoole')) {
             $this->error('Swoole extension is not installed.');
             return 1;
@@ -63,7 +63,7 @@ class SwooleWorkCommand extends Command
         $pool->on('WorkerStart', function ($pool, $workerId) use ($connection, $queue, $concurrency) {
             // Enable Swoole Hook for all IO operations
             Runtime::enableCoroutine(SWOOLE_HOOK_ALL);
-            
+
             // Re-seed the random number generator in the child process
             mt_srand();
 
@@ -79,14 +79,14 @@ class SwooleWorkCommand extends Command
                 false,              // force
                 false               // stopWhenEmpty
             );
-            
+
             // Run inside Coroutine container
             \Swoole\Coroutine\run(function () use ($connection, $queue, $options, $concurrency) {
                 try {
                     // Create CoroutineQueueManager
                     $originalManager = app('queue');
                     $coroutineManager = new CoroutineQueueManager(app());
-                    
+
                     // Copy connectors from original manager to our custom one
                     // We need reflection to access protected $connectors property
                     $reflection = new \ReflectionClass($originalManager);
@@ -104,12 +104,12 @@ class SwooleWorkCommand extends Command
                         }
                     );
                     $worker->setName('default');
-                    
+
                     $this->line("Worker process started (PID: " . getmypid() . ")");
-                    
+
                     // Start the coroutine loop
                     $worker->swooleLoop($connection, $queue, $options, $concurrency);
-                    
+
                 } catch (\Throwable $e) {
                     $this->error("Worker failed: " . $e->getMessage());
                 }
